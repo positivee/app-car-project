@@ -1,6 +1,6 @@
 import carList from "./car-list.json";
 import Cars from "./Cars";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useMemo } from "react";
 function App() {
   const [findCar, setFindCar] = useState("");
 
@@ -10,39 +10,36 @@ function App() {
   };
 
   //find car based on state in input field
-  const searchCar = useCallback(
-    (searchedCar) => {
-      const filtered = carList.map((brand) => {
-        const filteredModels = brand.models.filter((model) => {
-          if (
-            (brand.brand + " " + model)
-              .toLowerCase()
-              .includes(searchedCar.toLowerCase())
-          )
-            return model;
-          else return null;
-        });
-
+  const searchCar = useMemo(() => {
+    const filtered = carList.map((brand) => {
+      const filteredModels = brand.models.filter((model) => {
         if (
-          filteredModels.length === 0 &&
-          brand.brand.toLowerCase().includes(searchedCar.toLowerCase())
-        ) {
-          return { brand: brand.brand, models: brand.models };
-        } else if (filteredModels.length >= 1) {
-          return { brand: brand.brand, models: filteredModels };
-        } else {
-          return null;
-        }
+          (brand.brand + " " + model)
+            .toLowerCase()
+            .includes(findCar.toLowerCase())
+        )
+          return model;
+        else return null;
       });
-      return filtered.filter((item) => item !== null);
-    },
-    [findCar]
-  );
+
+      if (
+        filteredModels.length === 0 &&
+        brand.brand.toLowerCase().includes(findCar.toLowerCase())
+      ) {
+        return { brand: brand.brand, models: brand.models };
+      } else if (filteredModels.length >= 1) {
+        return { brand: brand.brand, models: filteredModels };
+      } else {
+        return null;
+      }
+    });
+    return filtered.filter((item) => item !== null);
+  }, [findCar]);
 
   return (
     <div className="App">
       <input type="text" value={findCar} onChange={handleChange}></input>
-      <Cars cars={searchCar(findCar)} />
+      <Cars cars={searchCar} />
     </div>
   );
 }
